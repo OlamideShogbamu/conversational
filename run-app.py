@@ -18,6 +18,8 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.chains import create_sql_query_chain
 from langchain_openai import ChatOpenAI
 
+from random import randint
+
 cache = Cache()
 
 app = Flask(__name__)
@@ -142,6 +144,11 @@ def chatbot(key, question):
     
     print(res['output'])
     return jsonify(res['output'])
+
+@app.route('/')
+def index():
+    random = randint(1, 1000)
+    return f'<h1> The number is : {random} </h1>'
 
 
 if __name__ == '__main__':
