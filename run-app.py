@@ -23,7 +23,6 @@ cache = Cache()
 app = Flask(__name__)
 app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
-#cache.init_app(app)
 
 db = SQLDatabase.from_uri('postgresql://pgAdmin:Geost4r%40123@pggeost4r.postgres.database.azure.com:5432/rmnchn')
 
@@ -45,7 +44,7 @@ system_prefix = """You are an agent designed to interact with a SQL database.
 Given an input question from a user, create a syntactically correct {dialect} query to run, then look at the results of the query and return the answer.
 Unless the user specifies a specific number of examples they wish to obtain, always limit your query to at most {top_k} results.
 You can order the results by a relevant column to return the most interesting examples in the database.
-\nHere is the relevant table info: {table_info}\n\nHere is a non-exhaustive \
+ \nHere is the relevant table info: {table_info}\n\nHere is a non-exhaustive \
 list of possible feature values. 
 You have access to tools for interacting with the database.
 Only use the given tools. Only use the information returned by the tools to construct your final answer.
@@ -72,57 +71,59 @@ queries = [
         "SELECT DISTINCT dmg_ward_di FROM microplan_2023_2024",
         "SELECT DISTINCT dmg_health_facility FROM microplan_2023_2024"
     ]
-
+    
 results = []
 for query in queries:
     res = db.run(query)
     res = [el for sub in ast.literal_eval(res) for el in sub if el]
     res = [re.sub(r"\b\d+\b", "", string).strip() for string in res]
     results.extend(res)
-
-os.environ["OPENAI_API_KEY"] = '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'
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
     
-vector_db = FAISS.from_texts(results, OpenAIEmbeddings())
-retriever = vector_db.as_retriever(search_kwargs={"k": 5})
-description = """Use to look up values to filter on. Input is an approximate spelling of the proper noun, output is \
-valid proper nouns. Use the noun most similar to the search."""
-retriever_tool = create_retriever_tool(
-retriever,
-name="proper_nouns",
-description=description,)
+@app.route('/scorecard/key/<key>/<question>')
+@cache.memoize(timeout=300)
+def chatbot(key, question):
+    os.environ["OPENAI_API_KEY"] = key
+    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+    
+    vector_db = FAISS.from_texts(results, OpenAIEmbeddings())
+    retriever = vector_db.as_retriever(search_kwargs={"k": 5})
+    description = """Use to look up values to filter on. Input is an approximate spelling of the proper noun, output is \
+    valid proper nouns. Use the noun most similar to the search."""
+    retriever_tool = create_retriever_tool(
+    retriever,
+    name="proper_nouns",
+    description=description,)
 
-example_selector = SemanticSimilarityExampleSelector.from_examples(
-examples,
-OpenAIEmbeddings(),
-FAISS,
-k=5,
-input_keys=["input"],)
+    example_selector = SemanticSimilarityExampleSelector.from_examples(
+    examples,
+    OpenAIEmbeddings(),
+    FAISS,
+    k=5,
+    input_keys=["input"],)
 
-from langchain_core.prompts import (
-ChatPromptTemplate,
-FewShotPromptTemplate,
-MessagesPlaceholder,
-PromptTemplate,
-SystemMessagePromptTemplate,)
+    from langchain_core.prompts import (
+    ChatPromptTemplate,
+    FewShotPromptTemplate,
+    MessagesPlaceholder,
+    PromptTemplate,
+    SystemMessagePromptTemplate,)
 
-few_shot_prompt = FewShotPromptTemplate(
-example_selector=example_selector,
-example_prompt=PromptTemplate.from_template(
-    "User input: {input}\nSQL query: {query}"
-),
-input_variables=["input", "dialect","table_info", "top_k", "proper_nouns"],
-prefix=system_prefix,
-suffix="",)
+    few_shot_prompt = FewShotPromptTemplate(
+    example_selector=example_selector,
+    example_prompt=PromptTemplate.from_template(
+        "User input: {input}\nSQL query: {query}"
+    ),
+    input_variables=["input", "dialect","table_info", "top_k", "proper_nouns"],
+    prefix=system_prefix,
+    suffix="",)
 
-full_prompt = ChatPromptTemplate.from_messages(
-[
-    SystemMessagePromptTemplate(prompt=few_shot_prompt),
-    ("human", "{input}"),
-    MessagesPlaceholder("agent_scratchpad"),
-])
-   
-def chatbot():   
+    full_prompt = ChatPromptTemplate.from_messages(
+    [
+        SystemMessagePromptTemplate(prompt=few_shot_prompt),
+        ("human", "{input}"),
+        MessagesPlaceholder("agent_scratchpad"),
+    ])
+
     agent = create_sql_agent(
     llm=llm,
     db=db,
@@ -132,25 +133,16 @@ def chatbot():
     verbose=True,
     agent_executor_kwargs={"return_intermediate_steps": True})
     
-    return agent
-
-@app.route('/scorecard/key/<question>')
-@cache.memoize(timeout=300) 
-def result(question):
-    cached_agent = chatbot()
-    res = cached_agent.invoke({"input": question})
-
-    intermediate_steps_output = []
+    # return agent
+    res = agent.invoke({"input": question})
     for action, r in res["intermediate_steps"]:
         for message in action.message_log:
             if message.content.strip():
-                intermediate_steps_output.append(message.content)
-
-    # for message in intermediate_steps_output:
-    #     print(message)
+                print(message.content)
     
     print(res['output'])
     return jsonify(res['output'])
+
 
 if __name__ == '__main__':
     app.run(debug=True)
