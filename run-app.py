@@ -29,13 +29,28 @@ app = Flask(__name__)
 app.config['CACHE_TYPE'] = 'simple'
 cache = Cache(app)
 
-username = os.getenv("username")
-password = os.getenv("password")
-host = os.getenv("host")
-port = os.getenv("port")
-database = os.getenv("database")
+# Fetching environment variables
+username = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWORD')
+host = os.getenv('DB_HOST')
+port = os.getenv('DB_PORT')
+database = os.getenv('DB_NAME')
 
-db = SQLDatabase.from_uri(f'postgresql://{username}:{password}@{host}:{port}/{database}')
+# Validate that all necessary environment variables are set
+if not all([username, password, host, port, database]):
+    raise ValueError("""
+                    One or more environment variables are missing. Please set DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, and DB_NAME in the .env file.
+                """)
+
+# Construct the database URI
+database_uri = f'postgresql://{username}:{password}@{host}:{port}/{database}'
+
+# Create the SQLDatabase instance
+try:
+    db = SQLDatabase.from_uri(database_uri)
+    print("Database connection successful!")
+except Exception as e:
+    print(f"Error connecting to the database: {e}")
 
 examples = [
     {"input": "How many LGAs reported the use of skilled birth attendants in the last quarter? Number of LGAs with skilled birth attendants reported in the latest quarter. Count LGAs with skilled birth attendants in Q4. Total LGAs with skilled birth attendants in the last quarter",
