@@ -8,3 +8,5 @@ venv/
 .history/
 .code/
 tmp.Dockerfile
+logs/
+.git/
