@@ -181,7 +181,8 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 8000))
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 # Take a snapshot
 snapshot = tracemalloc.take_snapshot()
