@@ -1,5 +1,14 @@
+setup:
+  config:
+    RUNTIME: python
+
 build:
   docker:
     web: Dockerfile
+
+release:
+  command:
+  - python run-app.py
+
 run:
   web: gunicorn --bind 0.0.0.0:$PORT run-app:app --timeout 300
