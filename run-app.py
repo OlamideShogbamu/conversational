@@ -18,8 +18,12 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.chains import create_sql_query_chain
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+import tracemalloc
 
 from random import randint
+
+# Start tracing memory allocations
+tracemalloc.start()
 
 load_dotenv()
 
@@ -178,3 +182,14 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# Take a snapshot
+snapshot = tracemalloc.take_snapshot()
+top_stats = snapshot.statistics('lineno')
+
+print("[ Top 10 memory consuming lines ]")
+for stat in top_stats[:10]:
+    print(stat)
+
+# Stop tracing memory allocations
+tracemalloc.stop()
