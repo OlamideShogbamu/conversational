@@ -1,5 +1,9 @@
-# Use the official Python base image
 FROM python:3.9.19
+
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup appuser
+
+USER appuser
 
 # Copy the requirements file into the container at /app
 COPY requirements.txt /app/requirements.txt
@@ -33,6 +37,4 @@ RUN apt-get update --no-install-recommends && \
 HEALTHCHECK --interval=5s --timeout=3s --start-period=5s \
     CMD curl --fail http://localhost:${PORT} || exit 1
 
-
-USER appuser
-CMD ["app:app"]
+CMD ["run-app:app"]
