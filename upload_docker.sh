@@ -5,12 +5,12 @@
 
 # Step 1:
 # Create dockerpath
-dockerpath=herbehordeun/conversational-bot-app
+dockerpath=herbehordeun/registry.heroku.com/dry-peak-46846/web
 
 # Step 2:
 # Authenticate & tag
 docker login --username=herbehordeun
-docker image tag conversational-bot-app $dockerpath
+docker image tag registry.heroku.com/dry-peak-46846/web $dockerpath
 echo "Docker ID and Image: $dockerpath"
 
 # Step 3:
