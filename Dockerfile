@@ -44,4 +44,4 @@ ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.co
 HEALTHCHECK --interval=5s --timeout=3s --start-period=5s \
     CMD curl --fail http://localhost:${PORT} || exit 1
 
-CMD ["run-app:app"]
+CMD ["app:app"]
