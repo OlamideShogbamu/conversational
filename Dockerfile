@@ -24,11 +24,15 @@ COPY . /app/
 ENTRYPOINT [ "gunicorn", "--bind", "0.0.0.0:$PORT" ]
 
 # Add curl for health check
-RUN apt-get update && apt-get --no-install-recommends install -y curl && \
+RUN apt-get update --no-install-recommends && \
+    apt-get install --no-install-recommends -y curl && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Healthcheck to ensure the app is running
-HEALTHCHECK --interval=5s --timeout=3s CMD curl --fail http://localhost:$PORT || exit 1
+HEALTHCHECK --interval=5s --timeout=3s --start-period=5s \
+    CMD curl --fail http://localhost:${PORT} || exit 1
 
-# Define the default command to run your application
+
+USER appuser
 CMD ["app:app"]
