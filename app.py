@@ -37,41 +37,41 @@ def chatbot(question):
 
         # Check if result is None
         if result is not None:
-            return jsonify({'output': result})
+            return jsonify({'output': result}), 200
         else:
             return jsonify({"error": "Job result is None"}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/process_question', methods=['POST'])
-def run_process_question():
-    data = request.get_json()
-    if not data or 'question' not in data:
-        return jsonify({'error': 'Invalid input'}), 400
+#@app.route('/process_question', methods=['POST'])
+#def run_process_question():
+#    data = request.get_json()
+#    if not data or 'question' not in data:
+#        return jsonify({'error': 'Invalid input'}), 400
+#
+#    question = data['question']
+#    task = process_question.apply_async(args=[question])
+#    return jsonify({'task_id': task.id}), 202
 
-    question = data['question']
-    task = process_question.apply_async(args=[question])
-    return jsonify({'task_id': task.id}), 202
-
-@app.route('/result/<task_id>', methods=['GET'])
-def get_result(task_id):
-    task = AsyncResult(task_id)
-    if task.state == 'PENDING':
-        response = {
-            'state': task.state,
-            'status': 'Pending...'
-        }
-    elif task.state != 'FAILURE':
-        response = {
-            'state': task.state,
-            'result': task.result
-        }
-    else:
-        response = {
-            'state': task.state,
-            'status': str(task.info)
-        }
-    return jsonify(response)
+#@app.route('/result/<task_id>', methods=['GET'])
+#def get_result(task_id):
+#    task = AsyncResult(task_id)
+#    if task.state == 'PENDING':
+#        response = {
+#            'state': task.state,
+#            'status': 'Pending...'
+#        }
+#    elif task.state != 'FAILURE':
+#        response = {
+#            'state': task.state,
+#            'result': task.result
+#        }
+#    else:
+#        response = {
+#            'state': task.state,
+#            'status': str(task.info)
+#        }
+#    return jsonify(response)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.getenv("PORT", 5050)), debug=True)
