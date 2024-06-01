@@ -1,9 +1,10 @@
+# Use the official Python base image
 FROM python:3.9.19
 
-RUN addgroup --system appgroup && \
-    adduser --system --ingroup appgroup appuser
-
-USER appuser
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PORT=5000
 
 # Copy the requirements file into the container at /app
 COPY requirements.txt /app/requirements.txt
@@ -18,11 +19,13 @@ RUN pip install --no-cache -r requirements.txt && \
 # Expose the ports your app runs on
 EXPOSE 5000
 
-# Define environment variable for the dynamic port
-ENV PORT=5000
-
 # Copy the current directory contents into the container at /app
 COPY . /app/
+
+# Create a non-root user and switch to that user
+RUN adduser --disabled-password --gecos '' myuser && \
+    chown -R myuser /app
+USER myuser
 
 # Set the entry point for the application to Python
 ENTRYPOINT [ "gunicorn", "--bind", "0.0.0.0:$PORT" ]
