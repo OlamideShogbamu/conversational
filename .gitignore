@@ -1,6 +1,5 @@
 run-copy.py
 __pycache__
-app.py
 olamide.ipynb
 env/
 venv/
@@ -10,3 +9,4 @@ venv/
 tmp.Dockerfile
 logs/
 .git/
+.trunk/

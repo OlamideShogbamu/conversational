@@ -112,8 +112,6 @@ for query in queries:
 @app.route('/scorecard/<question>')
 @cache.memoize(timeout=300)
 def chatbot(question):
-    key = os.getenv("OPENAI_API_KEY")
-    #os.environ["OPENAI_API_KEY"] = key
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
     vector_db = FAISS.from_texts(results, OpenAIEmbeddings())
