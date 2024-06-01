@@ -3,16 +3,16 @@
 # This tags and uploads an image to Docker Hub
 
 #This is your Docker ID/path
-dockerpath=herbehordeun/conversational-bot-app
+dockerpath=herbehordeun/registry.heroku.com/dry-peak-46846/web
 # Run the Docker Hub container with kubernetes
 
-kubectl run conversational-bot-app\
+kubectl run registry.heroku.com/dry-peak-46846/web\
     --image=$dockerpath\
-    --port=5000 --labels app=conversational-bot-app
+    --port=5000 --labels app=registry.heroku.com/dry-peak-46846/web
 
 
 # List kubernetes pods
 kubectl get pods
 
 # Forward the container port to a host
-kubectl port-forward conversational-bot-app 5000:5000
+kubectl port-forward registry.heroku.com/dry-peak-46846/web 5000:5000
