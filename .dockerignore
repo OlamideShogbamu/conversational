@@ -1,0 +1,13 @@
+*.pdf
+venv/
+.history/
+.vscode/
+.trunk/
+.mypy_cache/
+Dockerfile
+docker-compose.yml
+build_docker.sh
+run_docker.sh
+.dockerignore
+tmp.Dockerfile
+.git/
