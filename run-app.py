@@ -60,6 +60,9 @@ examples = [
     {"input": "How many LGAs reported the use of skilled birth attendants in the last quarter? Number of LGAs with skilled birth attendants reported in the latest quarter. Count LGAs with skilled birth attendants in Q4. Total LGAs with skilled birth attendants in the last quarter",
     "query": "SELECT COUNT(*) AS total_lgas FROM quarter4_scorecard WHERE 'SBA/ Deliveries' > 0;"
     },
+    {"input": "Were there any cases of maternal death reported in Kidandan ward of GIWA LGA in 2023? Did Kidandan ward record any maternal deaths in 2023? In 2023, was there any incidence of maternal death in the Kidandan ward of GIWA LGA?",
+    "query": "SELECT * FROM cbhmis_api WHERE ward = 'Kidandan' AND EXTRACT(YEAR FROM submission_time) = 2023;"
+    },
     {"input": "Which LGA has the highest number of antenatal visits in the first quarter? LGA with the maximum antenatal visits in Q1. Identify the LGA with the most antenatal visits in Q1. Find the LGA with the highest antenatal visits in the first quarter",
     "query": "SELECT lganame, SUM('Four antenatal visits/ Expected') AS total_antenatal_visits FROM quarter1_scorecard GROUP BY lganame ORDER BY total_antenatal_visits DESC LIMIT 1;"
     },
