@@ -17,7 +17,10 @@ from random import randint
 from dotenv import load_dotenv
 import tracemalloc
 
-askchat_bp = Blueprint("askchat", __name__, template_folder="templates")
+# askchat_bp = Blueprint("askchat", __name__, template_folder="templates")
+askchat_bp = Flask(__name__)
+askchat_bp.config['CACHE_TYPE'] = 'simple'
+cache = Cache(askchat_bp)
 
 # Start tracing memory allocations
 tracemalloc.start()
